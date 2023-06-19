@@ -22,8 +22,8 @@ Item {
 
         Repeater {
             id: timeline
-            width: Math.ceil(mediaPlayer.duration / 1000)
-                   * 10 // Adjust the multiplier as needed for the desired width
+            // Adjust the multiplier as needed for the desired width of the timeline
+            width: Math.ceil(mediaPlayer.duration / 1000) * 10
             height: 30 // Adjust the height as needed
             model: Math.ceil(
                        mediaPlayer.duration / 1000) // Generate tick marks every 1 second
@@ -32,11 +32,12 @@ Item {
                 width: 2
                 height: 8
                 color: "black"
+                // Position the tick marks along the timeline based on the index
                 x: timeline.width * index / (Math.ceil(
                                                  mediaPlayer.duration / 1000)) - width / 2
 
                 Text {
-                    text: formatTime(index)
+                    text: formatTime(index) // Display formatted time labels
                     font.pixelSize: 15
                     color: "black"
                     anchors.top: parent.bottom
@@ -57,15 +58,18 @@ Item {
             }
             enabled: mediaPlayer.seekable
             to: 1.0
-
             value: mediaPlayer.position / mediaPlayer.duration
 
             onMoved: {
-                mediaPlayer.setPosition(value * mediaPlayer.duration)
-                flickable.contentX = value * (flickable.contentWidth - flickable.width)
+                mediaPlayer.setPosition(
+                            value * mediaPlayer.duration) // Update playback position
+                flickable.contentX = value * (flickable.contentWidth
+                                              - flickable.width) // Adjust scroll position
             }
         }
 
+        // ScrollBar element (commented out)
+        // Uncomment and customize as needed to add a scroll bar below the timeline
         //        ScrollBar {
         //            id: scrollBar
         //            orientation: Qt.Horizontal
@@ -79,22 +83,24 @@ Item {
         //                radius: height / 2
         //            }
         //            position: flickable.contentX / (flickable.contentWidth - flickable.width)
-        //            onPositionChanged: flickable.contentX = position
-        //                               * (flickable.contentWidth - flickable.width)
+        //            onPositionChanged: flickable.contentX = position * (flickable.contentWidth - flickable.width)
         //            stepSize: flickable.width / flickable.contentWidth
         //        }
     }
 
     function formatTime(seconds) {
-        var minutes = Math.floor(seconds / 60)
-        var remainingSeconds = seconds % 60
-        return pad(minutes, 2) + ":" + pad(remainingSeconds, 2)
+        var minutes = Math.floor(
+                    seconds / 60) // Calculate the number of minutes
+        var remainingSeconds = seconds % 60 // Calculate the remaining seconds
+        return pad(minutes,
+                   2) + ":" + pad(remainingSeconds,
+                                  2) // Return the formatted time as mm:ss
     }
 
     function pad(num, size) {
-        var s = num.toString()
+        var s = num.toString() // Convert the number to a string
         while (s.length < size)
-            s = "0" + s
-        return s
+            s = "0" + s // Add leading zeros until the string reaches the desired size
+        return s // Return the padded string
     }
 }
