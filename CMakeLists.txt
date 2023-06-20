@@ -33,12 +33,6 @@ qt_add_resources(mediaplayer "mediaplayer"
         ${resource_files}
 )
 
-target_sources(mediaplayer_other_files
-  PRIVATE
-    Ruler.qml
-    timeline.qml
-)
-
 target_link_libraries(mediaplayer PRIVATE
     Qt6::Core
     Qt6::Svg

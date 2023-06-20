@@ -1,4 +1,3 @@
-
 // Copyright (C) 2021 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 import QtQuick
@@ -58,27 +57,20 @@ Item {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-        contentHeight: 80
+        contentHeight: 100
 
         background: Rectangle {
             color: "white"
         }
 
-        ColumnLayout {
+        RowLayout {
             id: playbackControlPanel
             anchors.fill: parent
-            anchors.leftMargin: 10
-            anchors.rightMargin: 10
 
-            PlaybackSeekControl {
-                Layout.fillWidth: true
-                mediaPlayer: root.mediaPlayer
-            }
-
-            RowLayout {
+            ColumnLayout {
                 id: playerButtons
 
-                Layout.fillWidth: true
+                Layout.fillHeight: true
 
                 PlaybackRateControl {
                     Layout.minimumWidth: 100
@@ -86,10 +78,6 @@ Item {
                     Layout.fillHeight: true
                     Layout.fillWidth: true
                     mediaPlayer: root.mediaPlayer
-                }
-
-                Item {
-                    Layout.fillWidth: true
                 }
 
                 RowLayout {
@@ -118,14 +106,17 @@ Item {
                     }
                 }
 
-                Item {
-                    Layout.fillWidth: true
-                }
-
                 AudioControl {
                     id: audio
                     Layout.minimumWidth: 100
                     Layout.maximumWidth: 150
+                    Layout.fillWidth: true
+                    mediaPlayer: root.mediaPlayer
+                }
+            }
+
+            ColumnLayout {
+                PlaybackSeekControl {
                     Layout.fillWidth: true
                     mediaPlayer: root.mediaPlayer
                 }

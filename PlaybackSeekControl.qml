@@ -13,79 +13,59 @@ Item {
 
     required property MediaPlayer mediaPlayer
 
-    Flickable {
-        id: flickable
+    implicitHeight: 20
+
+    RowLayout {
         anchors.fill: parent
-        contentWidth: timeline.width
-        contentHeight: timeline.height
-        boundsBehavior: Flickable.StopAtBounds
-
-        Repeater {
-            id: timeline
-            // Adjust the multiplier as needed for the desired width of the timeline
-            width: Math.ceil(mediaPlayer.duration / 1000) * 10
-            height: 30 // Adjust the height as needed
-            model: Math.ceil(
-                       mediaPlayer.duration / 1000) // Generate tick marks every 1 second
-
-            delegate: Rectangle {
-                width: 2
-                height: 8
-                color: "black"
-                // Position the tick marks along the timeline based on the index
-                x: timeline.width * index / (Math.ceil(
-                                                 mediaPlayer.duration / 1000)) - width / 2
-
-                Text {
-                    text: formatTime(index) // Display formatted time labels
-                    font.pixelSize: 15
-                    color: "black"
-                    anchors.top: parent.bottom
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    visible: index % 10 === 0 // Display time labels every 10 seconds
-                }
-            }
-        }
 
         Slider {
             id: mediaSlider
-            width: flickable.width
-            height: 20
-            anchors {
-                left: parent.left
-                right: parent.right
-                bottom: scrollBar.top
-            }
+            Layout.fillWidth: true
             enabled: mediaPlayer.seekable
             to: 1.0
             value: mediaPlayer.position / mediaPlayer.duration
 
-            onMoved: {
-                mediaPlayer.setPosition(
-                            value * mediaPlayer.duration) // Update playback position
-                flickable.contentX = value * (flickable.contentWidth
-                                              - flickable.width) // Adjust scroll position
+            onMoved: mediaPlayer.setPosition(value * mediaPlayer.duration)
+
+            // Tick marks and time labels
+            Repeater {
+                model: Math.ceil(
+                           mediaPlayer.duration / 1000) // Generate tick marks every 1 second
+
+                delegate: Rectangle {
+                    width: 2
+                    height: 8
+                    color: "black"
+                    x: mediaSlider.width * index / (Math.ceil(
+                                                        mediaPlayer.duration / 1000)) - width / 2
+
+                    // Time labels
+                    Text {
+                        text: formatTime(index)
+                        font.pixelSize: 10
+                        color: "black"
+                        anchors.top: parent.bottom
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        visible: index % 10 === 0 // Display time labels every 10 seconds
+                    }
+                }
             }
         }
+    }
 
-        // ScrollBar element (commented out)
-        // Uncomment and customize as needed to add a scroll bar below the timeline
-        //        ScrollBar {
-        //            id: scrollBar
-        //            orientation: Qt.Horizontal
-        //            width: flickable.width
-        //            height: 20
-        //            anchors.bottom: parent.bottom
-        //            contentItem: Rectangle {
-        //                width: flickable.width * flickable.width / flickable.contentWidth
-        //                height: parent.height
-        //                color: "lightgray"
-        //                radius: height / 2
-        //            }
-        //            position: flickable.contentX / (flickable.contentWidth - flickable.width)
-        //            onPositionChanged: flickable.contentX = position * (flickable.contentWidth - flickable.width)
-        //            stepSize: flickable.width / flickable.contentWidth
-        //        }
+    function calculateOptimalTickInterval(durationSeconds) {
+        // Calculate the base-10 logarithm of the duration
+        var log10 = Math.log(durationSeconds) / Math.log(10)
+
+        // Calculate the optimal tick interval
+        var tickInterval = Math.pow(10, Math.floor(log10))
+
+        // Adjust the tick interval for durations that are close to multiples of 5
+        if (log10 - Math.floor(log10) >= Math.log(5) / Math.log(10)) {
+            tickInterval *= 5
+        }
+
+        return tickInterval
     }
 
     function formatTime(seconds) {
