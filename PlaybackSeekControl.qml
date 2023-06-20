@@ -15,6 +15,10 @@ Item {
 
     implicitHeight: 20
 
+    // Calculate the optimal tick intervals
+    property var tickIntervals: root.calculateOptimalTickInterval(
+                                    mediaPlayer.duration / 1000)
+
     RowLayout {
         anchors.fill: parent
 
@@ -30,44 +34,82 @@ Item {
             // Tick marks and time labels
             Repeater {
                 model: Math.ceil(
-                           mediaPlayer.duration / 1000) // Generate tick marks every 1 second
+                           mediaPlayer.duration / 1000
+                           / root.tickIntervals[0]) // Generate main tick marks
 
                 delegate: Rectangle {
                     width: 2
                     height: 8
                     color: "black"
-                    x: mediaSlider.width * index / (Math.ceil(
-                                                        mediaPlayer.duration / 1000)) - width / 2
+                    x: mediaSlider.width * index
+                       / (Math.ceil(
+                              mediaPlayer.duration / 1000 / root.tickIntervals[0])) - width / 2
 
                     // Time labels
                     Text {
-                        text: formatTime(index)
+                        text: root.formatTime(index * root.tickIntervals[0])
                         font.pixelSize: 10
                         color: "black"
                         anchors.top: parent.bottom
                         anchors.horizontalCenter: parent.horizontalCenter
-                        visible: index % 10 === 0 // Display time labels every 10 seconds
+                        visible: true // Display time labels for all main tick marks
                     }
+                }
+            }
+
+            // Minor tick marks without labels
+            Repeater {
+                model: root.tickIntervals[1] ? Math.ceil(
+                                                   mediaPlayer.duration / 1000 / root.tickIntervals[1]) : 0 // Generate minor tick marks
+
+                delegate: Rectangle {
+                    width: 1
+                    height: 4
+                    color: "black"
+                    x: mediaSlider.width * index
+                       / (Math.ceil(
+                              mediaPlayer.duration / 1000 / root.tickIntervals[1])) - width / 2
                 }
             }
         }
     }
 
     function calculateOptimalTickInterval(durationSeconds) {
-        // Calculate the base-10 logarithm of the duration
-        var log10 = Math.log(durationSeconds) / Math.log(10)
+        // Define the thresholds for different tick intervals
+        var thresholds = [10, 30, 60, 300, 600, 3600, 18000, 36000]
+        var mainTickIntervals = [1, 5, 10, 30, 60, 300, 600, 3600]
+        var minorTickIntervals = [null, 1, 1, 5, 10, 30, 60, 300]
 
-        // Calculate the optimal tick interval
-        var tickInterval = Math.pow(10, Math.floor(log10))
+        var mainTickInterval = 1
+        var minorTickInterval = null
 
-        // Adjust the tick interval for durations that are close to multiples of 5
-        if (log10 - Math.floor(log10) >= Math.log(5) / Math.log(10)) {
-            tickInterval *= 5
+        // Iterate over the thresholds to find the suitable tick intervals
+        for (var i = 0; i < thresholds.length; ++i) {
+            if (durationSeconds <= thresholds[i]) {
+                mainTickInterval = mainTickIntervals[i]
+                minorTickInterval = minorTickIntervals[i]
+                break
+            }
         }
 
-        return tickInterval
+        // Return the main and minor tick intervals
+        return [mainTickInterval, minorTickInterval]
     }
 
+    //    function calculateOptimalTickInterval(durationSeconds) {
+    //        // Calculate the base-10 logarithm of the duration
+    //        var log10 = Math.log(durationSeconds) / Math.log(10)
+
+    //        // Calculate the optimal tick interval
+    //        var tickInterval = Math.pow(10, Math.floor(log10))
+
+    //        // Adjust the tick interval for durations that are close to multiples of 5
+    //        if (log10 - Math.floor(log10) >= Math.log(5) / Math.log(10)) {
+    //            tickInterval *= 5
+    //        }
+
+    //        return tickInterval
+    //    }
     function formatTime(seconds) {
         var minutes = Math.floor(
                     seconds / 60) // Calculate the number of minutes
